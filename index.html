@@ -51,93 +51,65 @@
     </div>
     
     <script>
-        // Base API URL for Tradovate
+        // Access token and API URL setup
         const apiUrl = 'https://demo.tradovateapi.com/v1/';
-        
-        // Initial access token and refresh token placeholders
-        let accessToken = 'YOUR_ACCESS_TOKEN'; // Replace with your actual access token \\ <-- Replace this
-        const refreshToken = 'YOUR_REFRESH_TOKEN'; // Replace with your actual refresh token \\ <-- Replace this
-
-        // OAuth details
-        const clientId = '4411'; // Replace with your OAuth client ID \\ <-- Replace this if needed
-        const clientSecret = 'a8a8f87d-06b2-417d-8873-37b65bef44d2'; // Replace with your OAuth secret \\ <-- Replace this if needed
-        const redirectUri = 'https://abelsamson77.github.io/oauth-redirect/'; // Ensure this matches your GitHub redirect URI \\ <-- Replace if needed
-
-        // Function to refresh access token if it expires
-        async function refreshAccessToken() {
-            try {
-                const response = await fetch('https://demo.tradovateapi.com/v1/oauth/token', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: new URLSearchParams({
-                        grant_type: 'refresh_token',
-                        refresh_token: refreshToken,
-                        client_id: clientId,
-                        client_secret: clientSecret,
-                        redirect_uri: redirectUri
-                    })
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    accessToken = data.access_token; // Update access token
-                    console.log('Token refreshed:', accessToken);
-                } else {
-                    console.error('Failed to refresh token');
-                }
-            } catch (error) {
-                console.error('Error refreshing token:', error);
-            }
-        }
-
-        // Function for making API requests
-        async function apiRequest(endpoint, method = 'POST', bodyData = {}) {
-            try {
-                const response = await fetch(`${apiUrl}${endpoint}`, {
-                    method: method,
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(bodyData)
-                });
-
-                if (response.status === 401) { // If token expired
-                    await refreshAccessToken();
-                    return await apiRequest(endpoint, method, bodyData); // Retry request after refresh
-                }
-
-                return response.ok;
-            } catch (error) {
-                console.error('API request error:', error);
-                return false;
-            }
-        }
+        const accessToken = '7kl280OEE542-2hIv8ynsvGjnf0gDTrWKGDNWnZALDSz-GG9InsIcPOf1w8pxwMGwUPP3Fnr4HPCgvELZu4t89qLztiCXknjivOhSn8dUFvMYci85jY1aIgFAgd7-i1OO0Yx0KYWGeOKNIO9TDmxi4HuuSq4P0_NE4aWHtIvrQT_i9bKFgboobl_c4zeYovCaxWKvmo-E5KasQ
+'; // Replace with your actual access token
 
         // Event listener for Activate Bot button
         document.getElementById("activateBot").addEventListener("click", async () => {
             const direction = document.getElementById("tradeDirection").value;
-            const quantity = parseInt(document.getElementById("quantity").value, 10);
-            const dollarTakeProfit = parseFloat(document.getElementById("dollarTakeProfit").value);
-            const priceTakeProfit = parseFloat(document.getElementById("priceTakeProfit").value);
+            const quantity = document.getElementById("quantity").value;
+            const dollarTakeProfit = document.getElementById("dollarTakeProfit").value;
+            const priceTakeProfit = document.getElementById("priceTakeProfit").value;
 
-            const success = await apiRequest('order/place', 'POST', {
-                direction: direction,
-                quantity: quantity,
-                dollarTakeProfit: dollarTakeProfit,
-                priceTakeProfit: priceTakeProfit
-            });
+            try {
+                // Send API request to activate the bot with given parameters
+                const response = await fetch(`${apiUrl}order/place`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        direction: direction,
+                        quantity: parseInt(quantity),
+                        dollarTakeProfit: parseFloat(dollarTakeProfit),
+                        priceTakeProfit: parseFloat(priceTakeProfit)
+                    })
+                });
 
-            document.getElementById("status").innerText = success ? "Bot activated successfully!" : "Error activating bot.";
+                if (response.ok) {
+                    document.getElementById("status").innerText = "Bot activated successfully!";
+                } else {
+                    document.getElementById("status").innerText = "Error activating bot.";
+                }
+            } catch (error) {
+                document.getElementById("status").innerText = "Error activating bot.";
+                console.error(error);
+            }
         });
 
         // Event listener for Close All Positions button
         document.getElementById("closePositions").addEventListener("click", async () => {
-            const success = await apiRequest('order/cancelall', 'POST');
+            try {
+                const response = await fetch(`${apiUrl}order/cancelall`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
 
-            document.getElementById("status").innerText = success ? "All positions closed successfully." : "Error closing positions.";
+                if (response.ok) {
+                    document.getElementById("status").innerText = "All positions closed successfully.";
+                } else {
+                    document.getElementById("status").innerText = "Error closing positions.";
+                }
+            } catch (error) {
+                document.getElementById("status").innerText = "Error closing positions.";
+                console.error(error);
+            }
         });
     </script>
 </body>
