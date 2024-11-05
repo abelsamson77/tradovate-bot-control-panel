@@ -51,9 +51,39 @@
     </div>
     
     <script>
-        // Access token and API URL setup
+        // Access token refresh setup
         const apiUrl = 'https://demo.tradovateapi.com/v1/';
-        const accessToken = 'YOUR_ACCESS_TOKEN_HERE'; // Replace with your actual access token
+        const CURRENT_TOKEN_KEY = 'accessToken';
+        const TOKEN_EXPIRATION_KEY = 'expirationTime';
+        const CLIENT_ID = '4411'; // Your OAuth client ID
+        const CLIENT_SECRET = 'a8a8f87d-06b2-417d-8873-37b65bef44d2'; // Your OAuth client secret
+        const REDIRECT_URI = 'https://abelsamson77.github.io/oauth-redirect/'; // Your redirect URI
+
+        async function renewAccessToken() {
+            const expiration = sessionStorage.getItem(TOKEN_EXPIRATION_KEY);
+            const now = new Date().getTime();
+            const exp = new Date(expiration).getTime();
+
+            // Renew if token expires within 15 minutes
+            if (exp - now < 15 * 60000) {
+                const currentToken = sessionStorage.getItem(CURRENT_TOKEN_KEY);
+                const renewal = await fetch(`${apiUrl}auth/renewAccessToken`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${currentToken}`
+                    }
+                });
+
+                const { accessToken: newAccessToken, expirationTime: newExpiration } = await renewal.json();
+                sessionStorage.setItem(CURRENT_TOKEN_KEY, newAccessToken);
+                sessionStorage.setItem(TOKEN_EXPIRATION_KEY, newExpiration);
+            }
+        }
+
+        // Set up an interval to check for token renewal every 2 minutes
+        setInterval(renewAccessToken, 2 * 60000); // 2 minutes interval
 
         // Event listener for Activate Bot button
         document.getElementById("activateBot").addEventListener("click", async () => {
@@ -66,6 +96,8 @@
                 document.getElementById("status").innerText = "Please fill in all fields.";
                 return;
             }
+
+            const accessToken = sessionStorage.getItem(CURRENT_TOKEN_KEY);
 
             try {
                 // Send API request to activate the bot with given parameters
@@ -96,6 +128,8 @@
 
         // Event listener for Close All Positions button
         document.getElementById("closePositions").addEventListener("click", async () => {
+            const accessToken = sessionStorage.getItem(CURRENT_TOKEN_KEY);
+
             try {
                 const response = await fetch(`${apiUrl}order/cancelall`, {
                     method: 'POST',
