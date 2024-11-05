@@ -31,18 +31,18 @@
         <h2>Bot Control Panel</h2>
         <label>Trade Direction:</label>
         <select id="tradeDirection">
-            <option value="buy">Buy</option>
-            <option value="sell">Sell</option>
+            <option value="Buy">Buy</option>
+            <option value="Sell">Sell</option>
         </select>
         
         <label>Quantity (Contracts):</label>
-        <input type="number" id="quantity" min="1" placeholder="Enter quantity">
+        <input type="number" id="quantity" min="1" placeholder="Enter quantity" required>
         
         <label>Dollar Take Profit:</label>
-        <input type="number" id="dollarTakeProfit" placeholder="Enter dollar take profit">
+        <input type="number" id="dollarTakeProfit" placeholder="Enter dollar take profit" required>
         
         <label>Price Take Profit:</label>
-        <input type="number" id="priceTakeProfit" placeholder="Enter price take profit">
+        <input type="number" id="priceTakeProfit" placeholder="Enter price take profit" required>
         
         <button id="activateBot">Activate Bot</button>
         <button id="closePositions">Close All Positions</button>
@@ -53,8 +53,7 @@
     <script>
         // Access token and API URL setup
         const apiUrl = 'https://demo.tradovateapi.com/v1/';
-        const accessToken = '7kl280OEE542-2hIv8ynsvGjnf0gDTrWKGDNWnZALDSz-GG9InsIcPOf1w8pxwMGwUPP3Fnr4HPCgvELZu4t89qLztiCXknjivOhSn8dUFvMYci85jY1aIgFAgd7-i1OO0Yx0KYWGeOKNIO9TDmxi4HuuSq4P0_NE4aWHtIvrQT_i9bKFgboobl_c4zeYovCaxWKvmo-E5KasQ
-'; // Replace with your actual access token
+        const accessToken = 'YOUR_ACCESS_TOKEN_HERE'; // Replace with your actual access token
 
         // Event listener for Activate Bot button
         document.getElementById("activateBot").addEventListener("click", async () => {
@@ -62,6 +61,11 @@
             const quantity = document.getElementById("quantity").value;
             const dollarTakeProfit = document.getElementById("dollarTakeProfit").value;
             const priceTakeProfit = document.getElementById("priceTakeProfit").value;
+
+            if (!quantity || !dollarTakeProfit || !priceTakeProfit) {
+                document.getElementById("status").innerText = "Please fill in all fields.";
+                return;
+            }
 
             try {
                 // Send API request to activate the bot with given parameters
@@ -72,7 +76,7 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        direction: direction,
+                        action: direction, 
                         quantity: parseInt(quantity),
                         dollarTakeProfit: parseFloat(dollarTakeProfit),
                         priceTakeProfit: parseFloat(priceTakeProfit)
@@ -82,7 +86,7 @@
                 if (response.ok) {
                     document.getElementById("status").innerText = "Bot activated successfully!";
                 } else {
-                    document.getElementById("status").innerText = "Error activating bot.";
+                    document.getElementById("status").innerText = "Error activating bot. Check token or fields.";
                 }
             } catch (error) {
                 document.getElementById("status").innerText = "Error activating bot.";
