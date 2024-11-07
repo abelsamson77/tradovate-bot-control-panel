@@ -29,6 +29,7 @@
 <body>
     <div class="control-panel">
         <h2>Bot Control Panel</h2>
+        
         <label>Symbol:</label>
         <input type="text" id="symbol" placeholder="Enter symbol" required>
 
@@ -54,13 +55,11 @@
     </div>
     
     <script>
-        // Access token refresh setup
         const apiUrl = 'https://demo.tradovateapi.com/v1/';
-        const CURRENT_TOKEN_KEY = 'accessToken';
-        const TOKEN_EXPIRATION_KEY = 'expirationTime';
-        
+        const accessToken = sessionStorage.getItem('CURRENT_TOKEN_KEY') || 'YOUR_ACCESS_TOKEN';
+
         async function renewAccessToken() {
-            // Renewal logic here (as described in previous steps)
+            // Renew token logic here...
         }
 
         // Event listener for Activate Bot button
@@ -76,8 +75,6 @@
                 return;
             }
 
-            const accessToken = sessionStorage.getItem(CURRENT_TOKEN_KEY);
-
             try {
                 const response = await fetch(`${apiUrl}order/place`, {
                     method: 'POST',
@@ -86,11 +83,11 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: direction,
+                        symbol: symbol,
+                        action: direction, 
                         quantity: parseInt(quantity),
                         dollarTakeProfit: parseFloat(dollarTakeProfit),
-                        priceTakeProfit: parseFloat(priceTakeProfit),
-                        symbol: symbol  // Send symbol to the bot
+                        priceTakeProfit: parseFloat(priceTakeProfit)
                     })
                 });
 
@@ -107,8 +104,6 @@
 
         // Event listener for Close All Positions button
         document.getElementById("closePositions").addEventListener("click", async () => {
-            const accessToken = sessionStorage.getItem(CURRENT_TOKEN_KEY);
-
             try {
                 const response = await fetch(`${apiUrl}order/cancelall`, {
                     method: 'POST',
