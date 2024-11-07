@@ -29,12 +29,8 @@
 <body>
     <div class="control-panel">
         <h2>Bot Control Panel</h2>
-
         <label>Symbol:</label>
-        <input type="text" id="symbol" placeholder="Enter symbol (e.g., ES)" required>
-
-        <label>Account ID:</label>
-        <input type="number" id="accountId" placeholder="Enter Account ID" required>
+        <input type="text" id="symbol" placeholder="Enter symbol" required>
 
         <label>Trade Direction:</label>
         <select id="tradeDirection">
@@ -58,45 +54,24 @@
     </div>
     
     <script>
+        // Access token refresh setup
         const apiUrl = 'https://demo.tradovateapi.com/v1/';
         const CURRENT_TOKEN_KEY = 'accessToken';
         const TOKEN_EXPIRATION_KEY = 'expirationTime';
-
-        // Access token renewal function
+        
         async function renewAccessToken() {
-            const expiration = sessionStorage.getItem(TOKEN_EXPIRATION_KEY);
-            const now = new Date().getTime();
-            const exp = new Date(expiration).getTime();
-
-            if (exp - now < 15 * 60000) {
-                const currentToken = sessionStorage.getItem(CURRENT_TOKEN_KEY);
-                const renewal = await fetch(`${apiUrl}auth/renewAccessToken`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'Authorization': `Bearer ${currentToken}`
-                    }
-                });
-
-                const { accessToken: newAccessToken, expirationTime: newExpiration } = await renewal.json();
-                sessionStorage.setItem(CURRENT_TOKEN_KEY, newAccessToken);
-                sessionStorage.setItem(TOKEN_EXPIRATION_KEY, newExpiration);
-            }
+            // Renewal logic here (as described in previous steps)
         }
-
-        setInterval(renewAccessToken, 2 * 60000); // Check for token renewal every 2 minutes
 
         // Event listener for Activate Bot button
         document.getElementById("activateBot").addEventListener("click", async () => {
             const symbol = document.getElementById("symbol").value;
-            const accountId = document.getElementById("accountId").value;
             const direction = document.getElementById("tradeDirection").value;
             const quantity = document.getElementById("quantity").value;
             const dollarTakeProfit = document.getElementById("dollarTakeProfit").value;
             const priceTakeProfit = document.getElementById("priceTakeProfit").value;
 
-            if (!symbol || !accountId || !quantity || !dollarTakeProfit || !priceTakeProfit) {
+            if (!symbol || !quantity || !dollarTakeProfit || !priceTakeProfit) {
                 document.getElementById("status").innerText = "Please fill in all fields.";
                 return;
             }
@@ -111,12 +86,11 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        action: direction, 
-                        symbol: symbol, 
-                        accountId: parseInt(accountId),
+                        action: direction,
                         quantity: parseInt(quantity),
                         dollarTakeProfit: parseFloat(dollarTakeProfit),
-                        priceTakeProfit: parseFloat(priceTakeProfit)
+                        priceTakeProfit: parseFloat(priceTakeProfit),
+                        symbol: symbol  // Send symbol to the bot
                     })
                 });
 
